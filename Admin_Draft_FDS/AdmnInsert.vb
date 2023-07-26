@@ -2,12 +2,13 @@
     Dim prodOrEmploy As String
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
         ' Save
-        If (prodOrEmploy = "product") Then
-            productAdd(prodOrEmploy)
-        Else
-            'Employee Here
+        Select Case prodOrEmploy
+            Case "product"
+                productAdd(prodOrEmploy)
+            Case "user"
+                employeeAdd(prodOrEmploy)
+        End Select
 
-        End If
 
     End Sub
 
@@ -51,6 +52,39 @@
         End Try
     End Sub
 
+    Public Sub employeeAdd(table As String)
+        Dim username, first_name, last_name, email, departmentname, rolename As String
+        username = TextBox1.Text
+        first_name = TextBox2.Text
+        last_name = TextBox3.Text
+        email = TextBox4.Text
+        departmentname = TextBox5.Text
+        rolename = TextBox6.Text
+
+        Dim arrInsert As New ArrayList From {
+            username,
+            first_name,
+            last_name,
+            email
+        }
+
+        Dim arrNamelist As New ArrayList From {
+            Label1.Text.ToString(),
+            Label2.Text.ToString(),
+            Label3.Text.ToString(),
+            Label4.Text.ToString()
+        }
+
+        Try
+            Dim statement As String = insertBuild(table, arrInsert, arrNamelist)
+            'Dim dtable As DataTable = exquery(statement)
+            'AdmnWholeList.dgrid.DataSource = dtable
+            'AdmnWholeList.resetform()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message)
+        End Try
+    End Sub
+
     Public Function insertBuild(table As String, arrList As ArrayList, arrNamelist As ArrayList) As String
         Dim columns = "", values As String = ""
 
@@ -64,7 +98,19 @@
                 End If
 
             Else
-                columns = columns + $"{arrNamelist(item)}"
+                Dim tblprefix As String
+                Select Case arrNamelist(item)
+                    Case "department"
+                        tblprefix = "department.name"
+                        columns = columns + $"{tblprefix}"
+                    Case "role"
+                        tblprefix = "role."
+                        columns = columns + $"{tblprefix}"
+                    Case Else
+                        tblprefix = "user."
+                        columns = columns + $"{tblprefix + arrNamelist(item)}"
+                End Select
+
                 If IsNumeric(arrList(item)) Then
                     values = values + $"{arrList(item)}"
                 Else
@@ -74,13 +120,8 @@
             End If
         Next
 
-        'Shortened by ChatGPT
-        'Dim columns As String = String.Join(",", arrNamelist)
-        'Dim values As String = String.Join(",", arrList.Select(Function(item) If(IsNumeric(item), item.ToString(), $"'{item}'")))
-
-
         Dim statement As String = $"INSERT INTO {table}({columns}) VALUES({values})"
-
+        MessageBox.Show(statement)
         Return statement
     End Function
 
@@ -100,10 +141,10 @@
     End Sub
 
     Public Sub empSetup(ByRef table As String)
-        Label1.Text = ""
-        Label2.Text = ""
-        Label3.Text = ""
-        Label4.Text = ""
+        Label1.Text = "username"
+        Label2.Text = "first_name"
+        Label3.Text = "last_name"
+        Label4.Text = "email"
         Label5.Text = ""
         Label6.Text = ""
         Label7.Text = ""
