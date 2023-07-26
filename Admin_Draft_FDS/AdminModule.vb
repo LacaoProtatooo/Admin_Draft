@@ -1,4 +1,5 @@
 ﻿Imports System.Data.Common
+Imports System.Data.Odbc
 Imports System.Reflection
 Imports CrystalDecisions.CrystalReports.Engine
 Imports Microsoft.VisualBasic.ApplicationServices
@@ -15,6 +16,13 @@ Module AdminModule
 
     Public connStr As String = "Data Source =localhost; Database=" + databasename + "; User= root; Password=;"
     Public conn As MySqlConnection = New MySqlConnection(connStr)
+
+    'Crystal Report Connection
+    Public conStrODBC As String = "DSN=mokoDB;"
+    Public connODBC As New OdbcConnection(conStrODBC)
+    Public adptrODBC As New OdbcDataAdapter
+    Public commODBC As New OdbcCommand
+
 
     Public sql As String
     Public dbcomm As MySqlCommand
@@ -68,13 +76,12 @@ Module AdminModule
     End Function
 
     ' TRY CRYSTAL REPORT WIP
-    Public Sub populate2nd()
-        'select id, item_name, category from product;
+    Public Sub populateCRYSTAL()
 
-        dataAdapter = New MySqlDataAdapter("Select * from " + tablename + "", conn)
+        adptrODBC = New OdbcDataAdapter("Select * from product ", connODBC)
         dt = New DataTable
-
         dataAdapter.Fill(dt)
+
     End Sub
 
     ' =================== SEARCH FILTER ========================
@@ -178,9 +185,24 @@ Module AdminModule
         Return dtable
     End Function
 
+    'SQL Statment Execute Non Query Integer single Value only
+    Public Function exqueyPK(statement As String) As Integer
+        Dim output As Integer
+        Try
+            conn.Open()
+            Dim command As New MySqlCommand(statement, conn)
+            Dim result As Object = command.ExecuteScalar()
+            If result IsNot Nothing AndAlso Not DBNull.Value.Equals(result) AndAlso Integer.TryParse(result.ToString(), output) Then
+                output = CInt(result)
+            End If
 
+        Catch ex As Exception
+            MessageBox.Show(ex.Message)
 
-
-
+        Finally
+            conn.Close()
+        End Try
+        Return output
+    End Function
 
 End Module

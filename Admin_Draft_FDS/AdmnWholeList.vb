@@ -7,7 +7,6 @@ Public Class AdmnWholeList
     Dim arrlist As New ArrayList
     Dim arrListContent As New ArrayList
     Dim dgridSelectedRow, optable, stm As String
-    Dim colcount As Integer
 
     Private Sub AdmnWholeList_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         productORemployee()
@@ -29,19 +28,18 @@ Public Class AdmnWholeList
         ' Data Grid Cell Click
         arrlist.Clear()
         arrListContent.Clear()
-        colcount = 0
         Button2.Enabled = True
-        Button4.Enabled = True
 
         txtbxSelectedRow.Text = dgrid.Rows(e.RowIndex).Cells(0).Value
         Dim slctRow As String = txtbxSelectedRow.Text
         dgridSelectedRow = slctRow
 
-        If (lblTitle.Text = "PRODUCTS INVENTORY") Then
-            flpProductLoad(slctRow)
-        Else
-            flpEmployeeLoad(slctRow)
-        End If
+        Select Case optable
+            Case "product"
+                flpProductLoad(slctRow)
+            Case "user"
+                flpEmployeeLoad(slctRow)
+        End Select
 
     End Sub
 
@@ -53,7 +51,6 @@ Public Class AdmnWholeList
             Try
                 Dim tbl As String = optable
                 AdmnInsert.prodSetup(tbl)
-                'AdmnInsert.productAdd(optable)
                 AdmnInsert.Show()
 
             Catch ex As Exception
@@ -95,19 +92,16 @@ Public Class AdmnWholeList
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
         ' Delete Row
-
         Try
-            'Dim delst As String = deleteStatement(dgridSelectedRow)
-            'Dim dtable As DataTable = exquery(delst)
-            'dgrid.DataSource = dtable.DefaultView
+            Dim delst As String = deleteStatement()
+            Dim dtable As DataTable = exquery(delst)
+            dgrid.DataSource = dtable.DefaultView
             resetform()
 
         Catch ex As Exception
             MessageBox.Show(ex.Message)
 
         End Try
-
-
     End Sub
 
     Public Sub flpProductLoad(selectedRow As String)
@@ -132,10 +126,30 @@ Public Class AdmnWholeList
         Catch ex As Exception
             MessageBox.Show(ex.Message)
         End Try
-
     End Sub
 
     Public Sub flpEmployeeLoad(selectedRow As String)
+        viewFLP.Controls.Clear()
+        Dim selectedColumns As String = " user.*, role.name as rolenm, department.name as dptnm "
+        Dim table As String = "user" + employeeJoin
+        Dim condition As String = $"user.id = {selectedRow}"
+
+        Try
+            Dim dtable As DataTable = contentSearcher(selectedColumns, table, condition)
+
+            For Each row As DataRow In dtable.Rows
+                For Each col As DataColumn In dtable.Columns
+
+                    Dim colname As String = CStr(col.ColumnName)
+                    Dim colobject As Object = (row(col.ColumnName))
+                    Dim content As String = colobject.ToString
+
+                    slctRowFLP(colname, content)
+                Next
+            Next
+        Catch ex As Exception
+            MessageBox.Show(ex.Message)
+        End Try
 
     End Sub
 
@@ -147,7 +161,6 @@ Public Class AdmnWholeList
 
         contentPanel.Size = New System.Drawing.Size(470, 35)
         lbl_info.Text = col
-        'lbl_content.Text = coldata
         dummytextbox.Text = coldata
 
         '
@@ -195,28 +208,24 @@ Public Class AdmnWholeList
         Dim name As String = txtbx.Name
         Dim editedText As String = txtbx.Text
         Dim op As String = productORemployee()
+        Button4.Enabled = True
 
-        If (op = "PRODUCTS INVENTORY") Then
-            ' Selected Column
+        ' Selected Column
+        If arrlist.Count = 0 Then
+            arrlist.Add(name)
+            arrListContent.Add(editedText)
+        Else
+            Dim index As Integer = arrlist.IndexOf(name)
 
-            If arrlist.Count = 0 Then
+            If index = -1 Then
                 arrlist.Add(name)
                 arrListContent.Add(editedText)
             Else
-                Dim index As Integer = arrlist.IndexOf(name)
-
-                If index = -1 Then
-                    arrlist.Add(name)
-                    arrListContent.Add(editedText)
-                Else
-                    arrListContent(index) = editedText
-                End If
+                arrListContent(index) = editedText
             End If
-
-        Else
-            MessageBox.Show("Employee")
-
         End If
+
+
     End Sub
 
     ' Update Statement Builder
@@ -235,15 +244,37 @@ Public Class AdmnWholeList
 
         ' Update Builder
         Dim statement As String = $"UPDATE {table} SET {condition} WHERE ID = {selectedRow}"
-        MessageBox.Show(statement)
+        'MessageBox.Show(statement)
 
         Return statement
     End Function
 
-    Private Function deleteStatement(selectedRow As String, table As String) As String
-        Dim statement As String '= $"DELETE FROM {table} WHERE id = {selectedRow}"
-        'MessageBox.Show(statement)
-        Return statement
+    Private Function deleteStatement() As String
+        Dim delst As String = ""
+        Dim dtable As New DataTable
+        productORemployee()
+
+        Try
+            Select Case optable
+                Case "product"
+                    delst = $"
+                        DELETE FROM product_has_supplier WHERE product_id = {dgridSelectedRow};
+                        DELETE FROM product WHERE id = {dgridSelectedRow};
+                        "
+                Case "user"
+                    delst = $"
+                        DELETE FROM user_has_department WHERE user_id = {dgridSelectedRow};
+                        DELETE FROM user_has_salary WHERE user_id = {dgridSelectedRow};
+                        DELETE FROM user_has_schedule WHERE user_id = {dgridSelectedRow};
+                        DELETE FROM login WHERE id = {dgridSelectedRow};
+                        DELETE FROM user WHERE id = {dgridSelectedRow};
+                        "
+            End Select
+        Catch ex As Exception
+            MessageBox.Show(ex.Message)
+        End Try
+
+        Return delst
     End Function
 
     Private Function productORemployee() As String
@@ -255,7 +286,7 @@ Public Class AdmnWholeList
         Else
             lblttl = "EMPLOYEE MANAGEMENT"
             optable = "user"
-            stm = "SELECT * FROM user"
+            stm = "SELECT user.*, role.name as rolenm, department.name as dptnm FROM user" + employeeJoin
         End If
 
         Return lblttl

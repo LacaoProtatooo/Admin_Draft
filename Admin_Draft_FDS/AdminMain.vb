@@ -14,6 +14,7 @@ Public Class AdminMain
             productLoad()
             employeeLoad()
             dtpcurrent()
+            CRload()
         Catch ex As Exception
             MessageBox.Show(ex.Message)
         End Try
@@ -79,6 +80,9 @@ Public Class AdminMain
         AdmnWholeList.Show()
         AdmnWholeList.lblTitle.Text = "EMPLOYEE MANAGEMENT"
         Me.Hide()
+
+        Dim statement As String = "SELECT user.*, role.name as rolenm, department.name as dptnm FROM user " + employeeJoin
+        AdmnWholeList.dgridPopulate(statement)
 
     End Sub
 
@@ -351,7 +355,7 @@ Public Class AdminMain
     Public strReportPath As String
     Private Sub verifyCr()
         ' This is Your Crystal Report Directory
-        strReportPath = "G:\TOHOOOO\APP DRAFTS\Visual Basic\draft_FDS\ProductList.rpt"
+        strReportPath = "C:\Users\vince\Source\Repos\Admin_Draft\Admin_Draft_FDS\ProductReport.rpt"
 
         If Not IO.File.Exists(strReportPath) Then
             MessageBox.Show("Unable to Locate File. " & vbCrLf & strReportPath)
@@ -360,11 +364,11 @@ Public Class AdminMain
 
 
     Private Sub CRload()
-        conn.Open()
-        verifyCr()
-        populate2nd()
-
         Try
+            connODBC.Open()
+            verifyCr()
+            populateCRYSTAL()
+
             ' Load the Crystal Report .rpt File and pass it onto Datatable
             Dim cr As New ReportDocument
 
@@ -382,7 +386,7 @@ Public Class AdminMain
             MessageBox.Show(ex.Message)
 
         Finally
-            conn.Close()
+            connODBC.Close()
         End Try
     End Sub
 
