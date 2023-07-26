@@ -158,7 +158,7 @@ Module AdminModule
         AdmnComponentInfo.Show()
     End Sub
 
-    'SQL Statment Execute Non Query to Data Table
+    'SQL Statment Execute Non Query
     Public Function exquery(statement As String) As DataTable
 
         Dim dtable As New DataTable

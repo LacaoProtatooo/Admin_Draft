@@ -2,8 +2,6 @@
 Imports System.Runtime.Remoting
 Imports System.Web.UI.WebControls
 Imports CrystalDecisions.CrystalReports.Engine
-Imports MySql.Data.MySqlClient
-Imports Mysqlx
 
 Public Class AdmnWholeList
     Dim arrlist As New ArrayList
@@ -13,7 +11,6 @@ Public Class AdmnWholeList
 
     Private Sub AdmnWholeList_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         productORemployee()
-        cmbxList()
 
     End Sub
 
@@ -22,10 +19,8 @@ Public Class AdmnWholeList
 
     End Sub
 
-    Public Sub dgridPopulate(stmnt As String)
-        Dim dtable As DataTable = dtablefill(stmnt)
-        dgrid.DataSource = Nothing
-        dgrid.Rows.Clear()
+    Public Sub dgridPopulate(statement As String)
+        Dim dtable As DataTable = dtablefill(statement)
         dgrid.DataSource = dtable.DefaultView
 
     End Sub
@@ -35,6 +30,7 @@ Public Class AdmnWholeList
         arrlist.Clear()
         arrListContent.Clear()
         colcount = 0
+        Button2.Enabled = True
         Button4.Enabled = True
 
         txtbxSelectedRow.Text = dgrid.Rows(e.RowIndex).Cells(0).Value
@@ -140,27 +136,7 @@ Public Class AdmnWholeList
     End Sub
 
     Public Sub flpEmployeeLoad(selectedRow As String)
-        viewFLP.Controls.Clear()
-        Dim selectedColumns As String = "user.*, role.name AS rolenm, department.name AS dptnm"
-        Dim table As String = "user" + employeeJoin
-        Dim condition As String = $"user.id = {selectedRow}"
 
-        Try
-            Dim dtable As DataTable = contentSearcher(selectedColumns, table, condition)
-
-            For Each row As DataRow In dtable.Rows
-                For Each col As DataColumn In dtable.Columns
-
-                    Dim colname As String = CStr(col.ColumnName)
-                    Dim colobject As Object = (row(col.ColumnName))
-                    Dim content As String = colobject.ToString
-
-                    slctRowFLP(colname, content)
-                Next
-            Next
-        Catch ex As Exception
-            MessageBox.Show(ex.Message)
-        End Try
     End Sub
 
     Public Sub slctRowFLP(col As String, coldata As String)
@@ -219,11 +195,10 @@ Public Class AdmnWholeList
         Dim name As String = txtbx.Name
         Dim editedText As String = txtbx.Text
         Dim op As String = productORemployee()
-        Button2.Enabled = True
 
         If (op = "PRODUCTS INVENTORY") Then
             ' Selected Column
-            ' Product
+
             If arrlist.Count = 0 Then
                 arrlist.Add(name)
                 arrListContent.Add(editedText)
@@ -239,22 +214,7 @@ Public Class AdmnWholeList
             End If
 
         Else
-            ' Employee
-
-            If arrlist.Count = 0 Then
-                arrlist.Add(name)
-                arrListContent.Add(editedText)
-            Else
-                Dim index As Integer = arrlist.IndexOf(name)
-
-                If index = -1 Then
-
-                    arrlist.Add(name)
-                    arrListContent.Add(editedText)
-                Else
-                    arrListContent(index) = editedText
-                End If
-            End If
+            MessageBox.Show("Employee")
 
         End If
     End Sub
@@ -264,38 +224,18 @@ Public Class AdmnWholeList
         Dim condition As String = String.Empty
         For item As Integer = 0 To arrColname.Count - 1
             Dim append As String = ""
-
-            Select Case optable
-                Case "product"
-                    If (Not item = arrColname.Count - 1) Then
-                        append = $"{arrColname(item)} = '{arrContent(item)}',"
-                    Else
-                        append = $"{arrColname(item)} = '{arrContent(item)}'"
-                    End If
-                Case "user"
-                    Dim tblprefix As String
-                    Select Case arrColname(item)
-                        Case "role"
-                            tblprefix = "role."
-                        Case "department"
-                            tblprefix = "department."
-                        Case Else
-                            tblprefix = "user."
-                    End Select
-                    If (Not item = arrColname.Count - 1) Then
-                        append = $"{tblprefix + arrColname(item)} = '{arrContent(item)}',"
-                    Else
-                        append = $"{tblprefix + arrColname(item)} = '{arrContent(item)}'"
-                    End If
-            End Select
+            If (Not item = arrColname.Count - 1) Then
+                append = $"{arrColname(item)} = '{arrContent(item)}',"
+            Else
+                append = $"{arrColname(item)} = '{arrContent(item)}'"
+            End If
 
             condition = condition + append
         Next
 
         ' Update Builder
         Dim statement As String = $"UPDATE {table} SET {condition} WHERE ID = {selectedRow}"
-
-        'MessageBox.Show(statement)
+        MessageBox.Show(statement)
 
         Return statement
     End Function
@@ -306,23 +246,6 @@ Public Class AdmnWholeList
         Return statement
     End Function
 
-    ' Combo box
-    Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles comboList.SelectedIndexChanged
-
-    End Sub
-
-    Private Sub cmbxList()
-        Dim empItems As String() = {"username", "first_name", "last_name", "phone_number", "email"}
-        comboList.Items.Clear()
-
-        If optable = "product" Then
-            Dim productItems As String() = {"item_name", "price", "stock_quantity", "brand", "category"}
-            comboList.Items.AddRange(productItems)
-        Else
-            comboList.Items.AddRange(empItems)
-        End If
-    End Sub
-
     Private Function productORemployee() As String
         Dim lblttl As String
         If lblTitle.Text = "PRODUCTS INVENTORY" Then
@@ -332,7 +255,7 @@ Public Class AdmnWholeList
         Else
             lblttl = "EMPLOYEE MANAGEMENT"
             optable = "user"
-            stm = "SELECT user.*, role.name AS rolenm, department.name AS dptnm FROM user" + employeeJoin
+            stm = "SELECT * FROM user"
         End If
 
         Return lblttl
@@ -348,6 +271,9 @@ Public Class AdmnWholeList
         Button4.Enabled = False
         Button2.Enabled = False
     End Sub
+
+
+
 
 
 End Class

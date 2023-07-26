@@ -80,9 +80,6 @@ Public Class AdminMain
         AdmnWholeList.lblTitle.Text = "EMPLOYEE MANAGEMENT"
         Me.Hide()
 
-        Dim statement As String = "SELECT user.*, role.name AS rolenm, department.name AS dptnm FROM user" + employeeJoin
-        AdmnWholeList.dgridPopulate(statement)
-
     End Sub
 
     Private Sub cmbxemploylist_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbxemploylist.SelectedIndexChanged
