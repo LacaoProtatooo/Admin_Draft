@@ -65,8 +65,8 @@ Public Class AdminMain
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         ' Open Whole Products List
-        AdmnWholeList.Show()
         AdmnWholeList.lblTitle.Text = "PRODUCTS INVENTORY"
+        AdmnWholeList.Show()
         Me.Hide()
 
         Dim statement As String = "Select * from product"
@@ -77,8 +77,8 @@ Public Class AdminMain
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         ' Open Whole Employees List
-        AdmnWholeList.Show()
         AdmnWholeList.lblTitle.Text = "EMPLOYEE MANAGEMENT"
+        AdmnWholeList.Show()
         Me.Hide()
 
         Dim statement As String = "SELECT user.*, role.name as rolenm, department.name as dptnm FROM user " + employeeJoin

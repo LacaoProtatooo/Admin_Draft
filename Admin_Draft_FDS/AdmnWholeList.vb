@@ -1,6 +1,7 @@
 ﻿Imports System.Diagnostics.Eventing.Reader
 Imports System.Runtime.Remoting
 Imports System.Web.UI.WebControls
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 Imports CrystalDecisions.CrystalReports.Engine
 
 Public Class AdmnWholeList
@@ -277,17 +278,81 @@ Public Class AdmnWholeList
         Return delst
     End Function
 
+    Private Sub cmbxSortBy_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbxSortBy.SelectedIndexChanged
+        Dim item As String = cmbxSortBy.SelectedItem.ToString
+
+        Select Case optable
+            Case "product"
+                Select Case item
+                    Case "id"
+                        stm = "SELECT * FROM product ORDER BY id"
+                    Case "item_name"
+                        stm = "SELECT * FROM product ORDER BY item_name"
+                    Case "price"
+                        stm = "SELECT * FROM product ORDER BY price"
+                    Case "stock_quantity"
+                        stm = "SELECT * FROM product ORDER BY stock_quantity"
+                    Case "description"
+                        stm = "SELECT * FROM product ORDER BY description"
+                    Case "brand"
+                        stm = "SELECT * FROM product ORDER BY brand"
+                    Case "category"
+                        stm = "SELECT * FROM product ORDER BY category"
+
+                End Select
+
+            Case "user"
+                Select Case item
+                    Case "id"
+                        stm = $"SELECT user.*, role.name as rolenm, department.name as dptnm FROM user {employeeJoin} ORDER BY user.id"
+                    Case "username"
+                        stm = $"SELECT user.*, role.name as rolenm, department.name as dptnm FROM user {employeeJoin} ORDER BY user.username"
+                    Case "first_name"
+                        stm = $"SELECT user.*, role.name as rolenm, department.name as dptnm FROM user {employeeJoin} ORDER BY user.first_name"
+                    Case "last_name"
+                        stm = $"SELECT user.*, role.name as rolenm, department.name as dptnm FROM user {employeeJoin} ORDER BY user.last_name"
+                    Case "role"
+                        stm = $"SELECT user.*, role.name as rolenm, department.name as dptnm FROM user {employeeJoin} ORDER BY role.name"
+                    Case "department"
+                        stm = $"SELECT user.*, role.name as rolenm, department.name as dptnm FROM user {employeeJoin} ORDER BY department.name"
+                End Select
+        End Select
+
+        sortResetForm()
+    End Sub
+
     Private Function productORemployee() As String
-        Dim lblttl As String
-        If lblTitle.Text = "PRODUCTS INVENTORY" Then
-            lblttl = "PRODUCTS INVENTORY"
-            optable = "product"
-            stm = "SELECT * FROM product"
-        Else
-            lblttl = "EMPLOYEE MANAGEMENT"
-            optable = "user"
-            stm = "SELECT user.*, role.name as rolenm, department.name as dptnm FROM user" + employeeJoin
-        End If
+        Dim lblttl As String = lblTitle.Text
+
+        Select Case lblttl
+            Case "PRODUCTS INVENTORY" ' Product
+
+                optable = "product"
+                stm = "SELECT * FROM product"
+
+                cmbxSortBy.Items.Clear()
+                cmbxSortBy.Items.Add("id")
+                cmbxSortBy.Items.Add("item_name")
+                cmbxSortBy.Items.Add("price")
+                cmbxSortBy.Items.Add("stock_quantity")
+                cmbxSortBy.Items.Add("description")
+                cmbxSortBy.Items.Add("brand")
+                cmbxSortBy.Items.Add("category")
+
+            Case "EMPLOYEE MANAGEMENT" ' Employee
+
+                optable = "user"
+                stm = "SELECT user.*, role.name as rolenm, department.name as dptnm FROM user" + employeeJoin
+
+                cmbxSortBy.Items.Clear()
+                cmbxSortBy.Items.Add("id")
+                cmbxSortBy.Items.Add("username")
+                cmbxSortBy.Items.Add("first_name")
+                cmbxSortBy.Items.Add("last_name")
+                cmbxSortBy.Items.Add("role")
+                cmbxSortBy.Items.Add("department")
+
+        End Select
 
         Return lblttl
     End Function
@@ -296,6 +361,16 @@ Public Class AdmnWholeList
         dgrid.DataSource = Nothing
         dgrid.Rows.Clear()
         productORemployee()
+
+        dgridPopulate(stm)
+        viewFLP.Controls.Clear()
+        Button4.Enabled = False
+        Button2.Enabled = False
+    End Sub
+
+    Public Sub sortResetForm()
+        dgrid.DataSource = Nothing
+        dgrid.Rows.Clear()
 
         dgridPopulate(stm)
         viewFLP.Controls.Clear()

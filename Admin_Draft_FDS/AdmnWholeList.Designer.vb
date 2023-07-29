@@ -30,7 +30,7 @@ Partial Class AdmnWholeList
         Me.txtbxSelectedRow = New System.Windows.Forms.TextBox()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.ComboBox1 = New System.Windows.Forms.ComboBox()
+        Me.cmbxSortBy = New System.Windows.Forms.ComboBox()
         Me.Panel12 = New System.Windows.Forms.Panel()
         Me.Button4 = New System.Windows.Forms.Button()
         Me.Panel11 = New System.Windows.Forms.Panel()
@@ -118,7 +118,7 @@ Partial Class AdmnWholeList
         Me.Panel13.Controls.Add(Me.txtbxSelectedRow)
         Me.Panel13.Controls.Add(Me.Label2)
         Me.Panel13.Controls.Add(Me.Label1)
-        Me.Panel13.Controls.Add(Me.ComboBox1)
+        Me.Panel13.Controls.Add(Me.cmbxSortBy)
         Me.Panel13.Location = New System.Drawing.Point(369, 5)
         Me.Panel13.Name = "Panel13"
         Me.Panel13.Padding = New System.Windows.Forms.Padding(2)
@@ -153,14 +153,15 @@ Partial Class AdmnWholeList
         Me.Label1.TabIndex = 1
         Me.Label1.Text = "Sort By :"
         '
-        'ComboBox1
+        'cmbxSortBy
         '
-        Me.ComboBox1.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Location = New System.Drawing.Point(2, 65)
-        Me.ComboBox1.Name = "ComboBox1"
-        Me.ComboBox1.Size = New System.Drawing.Size(119, 21)
-        Me.ComboBox1.TabIndex = 0
+        Me.cmbxSortBy.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.cmbxSortBy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbxSortBy.FormattingEnabled = True
+        Me.cmbxSortBy.Location = New System.Drawing.Point(2, 65)
+        Me.cmbxSortBy.Name = "cmbxSortBy"
+        Me.cmbxSortBy.Size = New System.Drawing.Size(119, 21)
+        Me.cmbxSortBy.TabIndex = 0
         '
         'Panel12
         '
@@ -367,7 +368,7 @@ Partial Class AdmnWholeList
     Friend WithEvents Button2 As Button
     Friend WithEvents Button1 As Button
     Friend WithEvents Panel13 As Panel
-    Friend WithEvents ComboBox1 As ComboBox
+    Friend WithEvents cmbxSortBy As ComboBox
     Friend WithEvents txtbxSelectedRow As TextBox
     Friend WithEvents Label2 As Label
     Friend WithEvents Label1 As Label
