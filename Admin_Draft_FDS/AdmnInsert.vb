@@ -1,4 +1,6 @@
-﻿Imports System.Web.UI.WebControls
+﻿Imports System.Diagnostics.Eventing.Reader
+Imports System.Web.UI.WebControls
+Imports CrystalDecisions.[Shared]
 Imports CrystalDecisions.Windows.Forms
 
 Public Class AdmnInsert
@@ -93,100 +95,92 @@ Public Class AdmnInsert
     End Sub
 
     Public Function insertBuild(table As String, arrList As ArrayList, arrNamelist As ArrayList) As String
-        Dim columns = "", values As String = ""
-        Dim diffTable = "", diffStmn As String = ""
-        Dim diffTable1 = "", diffStmn1 As String = ""
-        For item As Integer = 0 To arrNamelist.Count - 1
+        Dim statement As String = ""
+        Dim tblRole = "login", tblDeparment As String = "user_has_department" 'Table
+        Dim userCol = "", userVal = "", prodCol = "", prodVal As String = ""
+        Dim uscolbuild, prodcolbuild As New ArrayList
+        Dim usbuild, prodbuild As New ArrayList
+        Dim dpStm = "", userStm = "", usnm = "", rolStm As String = ""
 
-            If (Not item = arrNamelist.Count - 1) Then
+        Select Case prodOrEmploy
+            Case "product" 'Product
+                For item As Integer = 0 To arrNamelist.Count - 1
+                    prodcolbuild.Add(arrNamelist(item))
+                    prodbuild.Add(arrList(item))
+                Next
+                prodCol = insertStmColBuild(prodcolbuild)
+                prodVal = insertStmValBuild(prodbuild)
 
-                Select Case arrNamelist(item)
-                    Case "department"
-                        diffTable = "user_has_department"
-                        diffStmn = newInsertStatement(diffTable, cmbDepartment)
+                statement = $"INSERT INTO product({prodCol}) VALUES({prodVal});"
+                MessageBox.Show(statement)
 
-                    Case "role"
-                        diffTable1 = "login"
-                        diffStmn1 = newInsertStatement(diffTable1, cmbRole)
+            Case "user" ' Employee
+                For item As Integer = 0 To arrNamelist.Count - 1
+                    Select Case arrNamelist(item) 'Tables
+                        Case "department"
+                            dpStm = newInsertStatement(tblDeparment, usnm, cmbDepartment)
+                        Case "role"
+                            rolStm = newInsertStatement(tblRole, usnm, cmbRole)
+                        Case Else
+                            uscolbuild.Add(arrNamelist(item))
+                            usbuild.Add(arrList(item))
 
-                    Case "user"
-                        columns = columns + $"{arrNamelist(item)},"
-
-                        If IsNumeric(arrList(item)) Then
-                            values = values + $"{arrList(item)},"
-                        Else
-                            values = values + $"'{arrList(item)}',"
-                        End If
-                    Case Else
-                        If Not (arrNamelist(item) = "email") Then
-                            columns = columns + $"{arrNamelist(item)},"
-                        Else
-                            columns = columns + $"{arrNamelist(item)}"
-
-                        End If
-
-                        If IsNumeric(arrList(item)) Then
-                            values = values + $"{arrList(item)},"
-                        Else
-                            If Not (arrNamelist(item) = "email") Then
-                                values = values + $"'{arrList(item)}',"
-                            Else
-                                values = values + $"'{arrList(item)}'"
+                            If (arrNamelist(item) = "username") Then
+                                usnm = arrList(item)
                             End If
-                        End If
-                End Select
-            Else
-                Select Case arrNamelist(item)
-                    Case "department"
-                        diffTable = "user_has_department"
-                        diffStmn = newInsertStatement(diffTable, cmbDepartment)
 
-                    Case "role"
-                        diffTable1 = "login"
-                        diffStmn1 = newInsertStatement(diffTable1, cmbRole)
+                    End Select
+                Next
 
-                    Case "user"
-                        columns = columns + $"{arrNamelist(item)}"
+                userCol = insertStmColBuild(uscolbuild)
+                userVal = insertStmValBuild(usbuild)
+                userStm = $"INSERT INTO user({userCol}) VALUES({userVal});"
 
-                        If IsNumeric(arrList(item)) Then
-                            values = values + $"{arrList(item)}"
-                        Else
-                            values = values + $"'{arrList(item)}'"
-                        End If
-                    Case Else
-                        columns = columns + $"{arrNamelist(item)}"
+                statement = userStm + rolStm + dpStm
+                MessageBox.Show(statement)
 
-                        If IsNumeric(arrList(item)) Then
-                            values = values + $"{arrList(item)}"
-                        Else
-                            values = values + $"'{arrList(item)}'"
-                        End If
-                End Select
-            End If
-        Next
-
-        Dim statement As String = $"INSERT INTO {table}({columns}) VALUES({values});"
-        If Not (diffStmn = "") Then
-            Try
-                statement = statement + diffStmn
-
-            Catch ex As Exception
-                MessageBox.Show(ex.Message)
-            End Try
-        End If
-        If Not (diffStmn1 = "") Then
-            Try
-                statement = statement + diffStmn1
-
-            Catch ex As Exception
-                MessageBox.Show(ex.Message)
-            End Try
-        End If
-
+        End Select
         Return statement
     End Function
 
-    Public Function newInsertStatement(difftable As String, content As String) As String
+    ' Insert ColNames Statment Build
+    Public Function insertStmColBuild(collectedColName As ArrayList) As String
+        Dim Statement As String = ""
+        For item As Integer = 0 To collectedColName.Count - 1
+            If Not (item = collectedColName.Count - 1) Then
+                Statement = Statement + $"{collectedColName(item)},"
+            Else
+                Statement = Statement + $"{collectedColName(item)}"
+            End If
+        Next
+
+        Return Statement
+    End Function
+
+    ' Insert Values Statement Build
+    Public Function insertStmValBuild(collectedValues As ArrayList) As String
+        Dim statment As String = ""
+        For item As Integer = 0 To collectedValues.Count - 1
+            If Not (item = collectedValues.Count - 1) Then
+                If IsNumeric(collectedValues(item)) Then
+                    statment = statment + $"{collectedValues(item)},"
+                Else
+                    statment = statment + $"'{collectedValues(item)}',"
+                End If
+            Else
+                If IsNumeric(collectedValues(item)) Then
+                    statment = statment + $"{collectedValues(item)}"
+                Else
+                    statment = statment + $"'{collectedValues(item)}'"
+                End If
+            End If
+        Next
+
+        Return statment
+    End Function
+
+    ' For Department Table and Role Table Build
+    Public Function newInsertStatement(difftable As String, username As String, content As String) As String
         Dim statement As String = ""
         Dim pkey As Integer
         Dim index As String = ""
@@ -211,7 +205,7 @@ Public Class AdmnInsert
         Select Case difftable
             Case "login" ' ROLE
                 pkey = getHighestPK() + 1
-                statement = $"INSERT INTO login(id, password, role_id, user_id) VALUES({pkey.ToString},'mypassword',{index},{pkey.ToString});"
+                statement = $"INSERT INTO login(id, username, password, role_id) VALUES({pkey.ToString},'{username}','mypassword',{index});"
 
             Case "user_has_department" ' DEPARTMENT
                 pkey = getHighestPK() + 1
@@ -222,6 +216,7 @@ Public Class AdmnInsert
         Return statement
     End Function
 
+    'Get Highest Primary Key
     Private Function getHighestPK() As Integer
         Dim pkStatement As String = $"SELECT MAX(id) FROM user;"
         Dim result As Integer = exqueyPK(pkStatement)

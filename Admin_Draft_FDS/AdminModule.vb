@@ -9,7 +9,7 @@ Module AdminModule
 
     '===============================================================
 
-    Public databasename As String = "mock_db"
+    Public databasename As String = "project_deh_database"
     Public tablename As String = "product"
 
     'Data Source =localhost; Database= mock_db; User= root; Password=;
@@ -18,7 +18,7 @@ Module AdminModule
     Public conn As MySqlConnection = New MySqlConnection(connStr)
 
     'Crystal Report Connection
-    Public conStrODBC As String = "DSN=mokoDB;"
+    Public conStrODBC As String = "DSN=DEH_DB"
     Public connODBC As New OdbcConnection(conStrODBC)
     Public adptrODBC As New OdbcDataAdapter
     Public commODBC As New OdbcCommand
@@ -35,7 +35,7 @@ Module AdminModule
     Public employeeJoin As String =
     " INNER JOIN user_has_department ON user.id = user_has_department.user_id
     INNER JOIN department ON user_has_department.department_id = department.id
-    INNER JOIN login ON user.id = login.user_id
+    INNER JOIN login ON user.id = login.id
     INNER JOIN role ON login.role_id = role.id "
 
     ' SQL Statement to Data Table
